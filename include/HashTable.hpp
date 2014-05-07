@@ -12,6 +12,7 @@
 #include <vector>
 #include <limits>
 #include <algorithm>
+#include <map>
 
 // Class to manage a hash table (T = type, M = length, H = hash functor)
 template <typename T, typename H>
@@ -20,6 +21,9 @@ class HashTable
 public:
     // Define the storage type of the array
     typedef std::vector<T> storage_type;
+    
+    // Define
+    typedef std::map<typename storage_type::size_type, typename storage_type::size_type> cluster_type;
     
     // Define the search result type
     typedef typename storage_type::iterator search_result;
@@ -119,6 +123,48 @@ public:
         
         // Not found, return the end of the hash table
         return storage.end();
+    }
+    
+    // Return a map of the found clusters
+    void clusters(cluster_type& c)
+    {
+        // Make c emptry
+        c.clear();
+        
+        // Variable to keep track of cluster length
+        typename storage_type::size_type length = 0;
+        
+        // Loop through the hash table
+        for(search_result it = storage.begin(); it != storage.end(); it++)
+        {
+            // If this hash table location contains a value
+            if(*it != ENTRY_EMPTY && *it != ENTRY_UNUSED)
+            {
+                // Add to the current run
+                length++;
+            }
+            
+            // If we have encountered an empty location and we were calculating a run
+            else if (length)
+            {
+                // See if we have already found a run of this length
+                typename cluster_type::iterator cluster = c.find(length);
+                
+                // If this is a unique cluster
+                if(cluster == c.end())
+                {
+                    // One cluster of this length
+                    c[length] = 1;
+                } else
+                {
+                    // Found another cluster
+                    cluster->second++;
+                }
+                
+                // Clear the run
+                length = 0;
+            }
+        }
     }
     
     // Return the not found index of the hash table
