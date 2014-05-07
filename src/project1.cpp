@@ -186,6 +186,20 @@ void RunExperiment(size_t m, size_t n)
     std::cout << "tU / tS = " << tU / tS << std::endl << std::endl;
     
     
+    // Get the clusters
+    MyHashTable::cluster_type clusters;
+    t.clusters(clusters);
+    
+    // Print the clusters
+    size_t count = 0;
+    for(MyHashTable::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
+    {
+        std::cout << "Cluster Size: " << cluster->first << "; Frequency: " << cluster->second << std::endl;
+        count += cluster->first * cluster->second;
+    }
+    std::cout << "Total Results = " << count << std::endl << std::endl;
+    
+    
     // Remove the elements from the D set
     for(std::set<int64_t>::iterator it = D.begin(); it != D.end(); it++)
     {
@@ -223,6 +237,19 @@ void RunExperiment(size_t m, size_t n)
     // Results
     std::cout << "tS' = " << ptS << ", tU' = " << ptU << std::endl;
     std::cout << "tU' / tS' = " << ptU / ptS << std::endl;
+    
+    
+    // Get the clusters
+    t.clusters(clusters);
+    
+    // Print the clusters
+    count = 0;
+    for(MyHashTable::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
+    {
+        std::cout << "Cluster Size: " << cluster->first << "; Frequency: " << cluster->second << std::endl;
+        count += cluster->first * cluster->second;
+    }
+    std::cout << "Total Results = " << count << std::endl << std::endl;
 }
 
 // Main method
@@ -236,7 +263,7 @@ int main(int argc, const char * argv[])
     gettimeofday(&start,NULL);
     
     // Run the experiment (tablesize = 1M elements, generate 10k elements)
-    RunExperiment(1048576, 1000000);
+    RunExperiment(1000, 100);
     
     // Print the runtime
     gettimeofday(&end,NULL);
