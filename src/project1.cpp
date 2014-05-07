@@ -123,6 +123,56 @@ void GenerateKeys(size_t m, size_t n, std::set<int64_t>& S, std::set<int64_t>& D
     }
 }
 
+class Result
+{
+	struct timeval startTime, stopTime;
+	int numberOfElements;
+
+public:
+	double result;
+
+	void start(int numberOfElements)
+	{
+		this->numberOfElements = numberOfElements;
+		gettimeofday(&startTime, NULL);
+	}
+
+	void stop()
+	{
+		gettimeofday(&stopTime, NULL);
+		result = (stopTime.tv_sec - startTime.tv_sec) + (stopTime.tv_usec - startTime.tv_usec) / 1000000.0;
+		result /= (double)numberOfElements;
+	}
+
+	double getTimeDifference()
+	{
+		return 0;
+	}
+	
+	
+};
+
+struct ExperimentResult
+{
+	double minTime, maxTime;
+	std::string minType, maxType;
+	Result tS, tU, ptS, ptU;
+
+	void update()
+	{
+
+	}
+
+	void print()
+	{
+		// Results
+		std::cout << "tS = " << tS.result << ", tU = " << tU.result << std::endl;
+		std::cout << "tU / tS = " << tU.result / tS.result << std::endl;
+		std::cout << "tS' = " << ptS.result << ", tU' = " << ptU.result << std::endl;
+		std::cout << "tU' / tS' = " << ptU.result / ptS.result << std::endl;
+	}
+};
+
 // Run the experiment
 void RunExperiment(size_t m, size_t n)
 {
@@ -130,7 +180,8 @@ void RunExperiment(size_t m, size_t n)
     std::set<int64_t> S;
     std::set<int64_t> D;
     std::set<int64_t> U;
-    struct timeval start,end;
+
+	ExperimentResult expResult;
     
     
     // Make shit
@@ -157,34 +208,25 @@ void RunExperiment(size_t m, size_t n)
     
     // Perform the initial experiment
     // Search for the elements in the S set
-    gettimeofday(&start,NULL);
+	expResult.tS.start(S.size());
     for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
     {
         // Perform the search
         MyHashTable::search_result r = t.search(*it);
         assert(*r == *it);
     }
-    gettimeofday(&end,NULL);
-    double tS = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
-    tS /= (double) S.size();
+	expResult.tS.stop();
     
     
     // Search for the elements in the U set
-    gettimeofday(&start,NULL);
+	expResult.tU.start(U.size());
     for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
     {
         // Perform the search
         MyHashTable::search_result r = t.search(*it);
         assert(r == t.NotFound());
     }
-    gettimeofday(&end,NULL);
-    double tU = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
-    tU /= (double) U.size();
-    
-    
-    // Results
-    std::cout << "tS = " << tS << ", tU = " << tU << std::endl;
-    std::cout << "tU / tS = " << tU / tS << std::endl;
+	expResult.tU.stop();
     
     
     // Remove the elements from the D set
@@ -196,34 +238,27 @@ void RunExperiment(size_t m, size_t n)
     
     // Perform the secondary experiment
     // Search for the elements in the S set
-    gettimeofday(&start,NULL);
+	expResult.ptS.start(S.size());
     for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
     {
         // Perform the search
         MyHashTable::search_result r = t.search(*it);
         assert(*r == *it);
     }
-    gettimeofday(&end,NULL);
-    double ptS = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
-    ptS /= (double) S.size();
+	expResult.ptS.stop();
     
     
     // Search for the elements in the U set
-    gettimeofday(&start,NULL);
+	expResult.ptU.start(U.size());
     for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
     {
         // Perform the search
         MyHashTable::search_result r = t.search(*it);
         assert(r == t.NotFound());
     }
-    gettimeofday(&end,NULL);
-    double ptU = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
-    ptU /= (double) U.size();
+	expResult.ptU.stop();
     
-    
-    // Results
-    std::cout << "tS' = " << ptS << ", tU' = " << ptU << std::endl;
-    std::cout << "tU' / tS' = " << ptU / ptS << std::endl;
+	expResult.print();
 }
 
 // Main method
