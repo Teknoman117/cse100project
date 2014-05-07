@@ -129,7 +129,7 @@ class Result
 	int numberOfElements;
 
 public:
-	double result;
+	double duration;
 
 	void start(int numberOfElements)
 	{
@@ -140,36 +140,90 @@ public:
 	void stop()
 	{
 		gettimeofday(&stopTime, NULL);
-		result = (stopTime.tv_sec - startTime.tv_sec) + (stopTime.tv_usec - startTime.tv_usec) / 1000000.0;
-		result /= (double)numberOfElements;
-	}
-
-	double getTimeDifference()
-	{
-		return 0;
+		duration = (stopTime.tv_sec - startTime.tv_sec) + (stopTime.tv_usec - startTime.tv_usec) / 1000000.0;
+		duration /= (double)numberOfElements;
 	}
 	
+	double operator/(const Result& r)
+	{
+		return this->duration / r.duration;
+	}
 	
 };
+
+std::ostream& operator<<(std::ostream& os, const Result& r)
+{
+	os << r.duration;
+	return os;
+}
 
 struct ExperimentResult
 {
 	double minTime, maxTime;
 	std::string minType, maxType;
 	Result tS, tU, ptS, ptU;
-
-	void update()
+	
+	void calcMin()
 	{
+		minTime = tS.duration;
+		minType = "tS";
 
+		if (tU.duration < minTime)
+		{
+			minTime = tU.duration;
+			minType = "tU";
+		}
+
+		if (ptS.duration < minTime)
+		{
+			minTime = ptS.duration;
+			minType = "ptS";
+		}
+
+		if (ptU.duration < minTime)
+		{
+			minTime = ptU.duration;
+			minType = "ptU";
+		}
+	}
+
+	void calcMax()
+	{
+		maxTime = tS.duration;
+		maxType = "tS";
+
+		if (tU.duration > maxTime)
+		{
+			maxTime = tU.duration;
+			maxType = "tU";
+		}
+
+		if (ptS.duration > maxTime)
+		{
+			maxTime = ptS.duration;
+			maxType = "ptS";
+		}
+
+		if (ptU.duration > maxTime)
+		{
+			maxTime = ptU.duration;
+			maxType = "ptU";
+		}
 	}
 
 	void print()
 	{
+		calcMin();
+		calcMax();
+
 		// Results
-		std::cout << "tS = " << tS.result << ", tU = " << tU.result << std::endl;
-		std::cout << "tU / tS = " << tU.result / tS.result << std::endl;
-		std::cout << "tS' = " << ptS.result << ", tU' = " << ptU.result << std::endl;
-		std::cout << "tU' / tS' = " << ptU.result / ptS.result << std::endl;
+		std::cout << "tS = " << tS << ", tU = " << tU << std::endl;
+		std::cout << "tU / tS = " << tU / tS << std::endl;
+		std::cout << "tS' = " << ptS << ", tU' = " << ptU << std::endl;
+		std::cout << "tU' / tS' = " << ptU / ptS << std::endl;
+
+		std::cout << "Min is " << minType.c_str() << " with time:\t" << minTime << std::endl;
+		std::cout << "Max is " << maxType.c_str() << " with time:\t" << maxTime << std::endl;
 	}
 };
 

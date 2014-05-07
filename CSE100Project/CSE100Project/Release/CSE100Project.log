@@ -1,4 +1,4 @@
-﻿Build started 5/6/2014 8:48:55 PM.
+﻿Build started 5/6/2014 9:20:17 PM.
      1>Project "C:\Users\Zachary\Documents\cse100project\CSE100Project\CSE100Project\CSE100Project.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\src\project1.cpp
@@ -14,13 +14,13 @@
                      _Ty=__int64
          ,            T=int64_t
                  ]
-                 ..\..\src\project1.cpp(215) : see reference to function template instantiation 'std::_Vector_iterator<std::_Vector_val<std::_Simple_types<_Ty>>> HashTable<int64_t,hash_double<int64_t>>::search(const T &)' being compiled
+                 ..\..\src\project1.cpp(269) : see reference to function template instantiation 'std::_Vector_iterator<std::_Vector_val<std::_Simple_types<_Ty>>> HashTable<int64_t,hash_double<int64_t>>::search(const T &)' being compiled
                  with
                  [
                      _Ty=__int64
          ,            T=int64_t
                  ]
-                 ..\..\src\project1.cpp(192) : see reference to class template instantiation 'HashTable<int64_t,hash_double<int64_t>>' being compiled
+                 ..\..\src\project1.cpp(246) : see reference to class template instantiation 'HashTable<int64_t,hash_double<int64_t>>' being compiled
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Zachary\Documents\cse100project\CSE100Project\Release\CSE100Project.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Zachary\Documents\cse100project\CSE100Project\Release\CSE100Project.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Zachary\Documents\cse100project\CSE100Project\Release\CSE100Project.lib" /MACHINE:X86 /SAFESEH Release\project1.obj
          Generating code
@@ -30,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.05
+Time Elapsed 00:00:03.22
