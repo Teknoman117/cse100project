@@ -1,4 +1,4 @@
-﻿Build started 5/6/2014 7:57:14 PM.
+﻿Build started 5/6/2014 8:00:18 PM.
      1>Project "C:\Users\Zachary\Documents\cse100project\CSE100Project\CSE100Project\CSE100Project.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\src\project1.cpp
@@ -7,7 +7,7 @@
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\time.h(155) : see declaration of '__timezone'
      1>..\..\src\project1.cpp(64): warning C4996: '__daylight': This function or variable may be unsafe. Consider using _get_daylight instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\time.h(147) : see declaration of '__daylight'
-     1>..\..\src\project1.cpp(233): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>..\..\src\project1.cpp(235): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
      1>C:\Users\Zachary\Documents\cse100project\include\HashTable.hpp(100): warning C4018: '<' : signed/unsigned mismatch
                  C:\Users\Zachary\Documents\cse100project\include\HashTable.hpp(95) : while compiling class template member function 'std::_Vector_iterator<std::_Vector_val<std::_Simple_types<_Ty>>> HashTable<int64_t,hash_double<int64_t>>::search(const T &)'
                  with
@@ -31,4 +31,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.61
+Time Elapsed 00:00:03.23
