@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F1CAD83419186B7800B02484 /* project1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F1CAD83319186B7800B02484 /* project1.cpp */; };
+		F11C9F5A1919A34500F73BDB /* project1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F11C9F591919A34500F73BDB /* project1.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,10 +23,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F11C9F571919A33D00F73BDB /* HashFunctions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HashFunctions.hpp; path = include/HashFunctions.hpp; sourceTree = SOURCE_ROOT; };
+		F11C9F581919A33D00F73BDB /* HashTable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HashTable.hpp; path = include/HashTable.hpp; sourceTree = SOURCE_ROOT; };
+		F11C9F591919A34500F73BDB /* project1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = project1.cpp; path = src/project1.cpp; sourceTree = SOURCE_ROOT; };
 		F1CAD82119182FDF00B02484 /* project1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = project1; sourceTree = BUILT_PRODUCTS_DIR; };
-		F1CAD83119186B7800B02484 /* HashFunctions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HashFunctions.hpp; path = ../../include/HashFunctions.hpp; sourceTree = "<group>"; };
-		F1CAD83219186B7800B02484 /* HashTable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HashTable.hpp; path = ../../include/HashTable.hpp; sourceTree = "<group>"; };
-		F1CAD83319186B7800B02484 /* project1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = project1.cpp; path = ../../src/project1.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,9 +59,9 @@
 		F1CAD82319182FDF00B02484 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				F1CAD83119186B7800B02484 /* HashFunctions.hpp */,
-				F1CAD83219186B7800B02484 /* HashTable.hpp */,
-				F1CAD83319186B7800B02484 /* project1.cpp */,
+				F11C9F571919A33D00F73BDB /* HashFunctions.hpp */,
+				F11C9F581919A33D00F73BDB /* HashTable.hpp */,
+				F11C9F591919A34500F73BDB /* project1.cpp */,
 			);
 			name = src;
 			path = project1;
@@ -118,7 +118,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F1CAD83419186B7800B02484 /* project1.cpp in Sources */,
+				F11C9F5A1919A34500F73BDB /* project1.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
