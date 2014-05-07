@@ -249,7 +249,7 @@ int main(int argc, const char * argv[])
             std::cin >> num_of_elements;
             
             //check for tards
-            if(tablesize < num_of_elements)
+            if(tablesize <= num_of_elements)
                 std::cout << "Test Not Valid" << std::endl;
             
         } while(tablesize <= num_of_elements);
