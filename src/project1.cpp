@@ -126,12 +126,12 @@ void GenerateKeys(size_t m, size_t n, std::set<int64_t>& S, std::set<int64_t>& D
 class Result
 {
 	struct timeval startTime, stopTime;
-	int numberOfElements;
+	size_t numberOfElements;
 
 public:
 	double duration;
 
-	void start(int numberOfElements)
+	void start(size_t numberOfElements)
 	{
 		this->numberOfElements = numberOfElements;
 		gettimeofday(&startTime, NULL);
