@@ -254,7 +254,7 @@ int main(int argc, const char * argv[])
         } while(tablesize <= num_of_elements);
         
         // Seed the random generator with the current time
-        srand(time(NULL));
+        srand(static_cast<unsigned int> (time(NULL)));
         
         // Time the experiment
         struct timeval start,end;
