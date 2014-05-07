@@ -78,6 +78,7 @@ int64_t lrand()
 {
     // Generate a random upper
     int64_t randomU = rand();
+	// Generate a random lower
     int64_t randomL = rand();
     
     // Return the mix
