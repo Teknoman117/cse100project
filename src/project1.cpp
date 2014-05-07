@@ -224,6 +224,8 @@ void RunExperiment(size_t m, size_t n)
     std::cout << "tS' = " << ptS << ", tU' = " << ptU << std::endl;
     std::cout << "tU' / tS' = " << ptU / ptS << std::endl;
 }
+const int tablesize = 1048576;
+const int num_of_elements = 1000000;
 
 // Main method
 int main(int argc, const char * argv[])
@@ -236,7 +238,7 @@ int main(int argc, const char * argv[])
     gettimeofday(&start,NULL);
     
     // Run the experiment (tablesize = 1M elements, generate 10k elements)
-    RunExperiment(1048576, 1000000);
+    RunExperiment(tablesize, num_of_elements);
     
     // Print the runtime
     gettimeofday(&end,NULL);
