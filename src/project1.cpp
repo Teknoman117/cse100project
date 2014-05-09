@@ -19,12 +19,12 @@
 #include "ChainingHashTable.hpp"
 
 // Hash table type
-typedef HashTable<int64_t, hash_double<int64_t> > MyHashTable;
+typedef HashTable<int64_t, hash<int64_t> > MyHashTable;
 
 // Generate the keys for the experiment
 void GenerateKeys(size_t m, size_t n, std::set<int64_t>& S, std::set<int64_t>& D, std::set<int64_t>& U)
 {
-    // Allocate required memory
+    // Clear the provided sets
     S.clear();
     D.clear();
     U.clear();
@@ -180,7 +180,7 @@ void RunExperiment(size_t m, size_t n)
     
     // Create a hash table w/ open indexing for this lab
     MyHashTable t(m);
-    
+    //ChainingHashTable<int64_t, chash<int64_t> > ct(m);
     
     // Insert the elements from the S set
     for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
@@ -278,11 +278,11 @@ void RunExperiment(size_t m, size_t n)
 // Main method
 int main(int argc, const char * argv[])
 {
-    int tablesize;
-    int num_of_elements;
+    int tablesize = 1048576;
+    int num_of_elements = 1000000;
     int testnumber = 0;
     
-    do
+    /*do
     {
         do
         {
@@ -301,7 +301,7 @@ int main(int argc, const char * argv[])
             if(tablesize <= num_of_elements)
                 std::cout << "Test Not Valid" << std::endl;
             
-        } while(tablesize <= num_of_elements);
+        } while(tablesize <= num_of_elements);*/
         
         // Seed the random generator with the current time
         srand(static_cast<unsigned int> (time(NULL)));
@@ -317,8 +317,8 @@ int main(int argc, const char * argv[])
         gettimeofday(&end,NULL);
         fprintf(stdout,"Experiment Runtime: %f\n\n",(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0);
         
-        testnumber++;
-    } while(tablesize != 0  && num_of_elements != 0);
+        //testnumber++;
+    //} while(tablesize != 0  && num_of_elements != 0);
     
     return 0;
 }

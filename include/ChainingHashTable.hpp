@@ -38,7 +38,7 @@ protected:
 public:
     // Constructor - initializes the hash function and initializes the storage
     ChainingHashTable(typename storage_type::size_type M)
-        : storage(M, T()), hash_function(H(M)), M(M)
+        : storage(M), hash_function(H(M)), M(M)
     {
         
     }
