@@ -111,4 +111,25 @@ struct hash_mult_double
     }
 };
 
+// Basic hash function (k mod m)
+template <typename T>
+struct chash
+{
+    // Size of the parent hash table
+    size_t M;
+    
+    // Constructor
+    chash(size_t M)
+    {
+        this->M = M;
+    }
+    
+    // Functor operator
+    size_t operator() (const T& k) const
+    {
+        // Basic hash
+        return k % M;
+    }
+};
+
 #endif

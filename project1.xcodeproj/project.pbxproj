@@ -26,6 +26,8 @@
 		F11C9F571919A33D00F73BDB /* HashFunctions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HashFunctions.hpp; path = include/HashFunctions.hpp; sourceTree = SOURCE_ROOT; };
 		F11C9F581919A33D00F73BDB /* HashTable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HashTable.hpp; path = include/HashTable.hpp; sourceTree = SOURCE_ROOT; };
 		F11C9F591919A34500F73BDB /* project1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = project1.cpp; path = src/project1.cpp; sourceTree = SOURCE_ROOT; };
+		F1B4C372191C43E500727C4B /* ChainingHashTable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ChainingHashTable.hpp; path = include/ChainingHashTable.hpp; sourceTree = SOURCE_ROOT; };
+		F1B4C374191C4CCD00727C4B /* Utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Utilities.h; path = include/Utilities.h; sourceTree = SOURCE_ROOT; };
 		F1CAD82119182FDF00B02484 /* project1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = project1; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -40,9 +42,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F1B4C375191C4DFF00727C4B /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				F1B4C374191C4CCD00727C4B /* Utilities.h */,
+				F11C9F571919A33D00F73BDB /* HashFunctions.hpp */,
+				F11C9F581919A33D00F73BDB /* HashTable.hpp */,
+				F1B4C372191C43E500727C4B /* ChainingHashTable.hpp */,
+			);
+			name = includes;
+			sourceTree = "<group>";
+		};
 		F1CAD81819182FDF00B02484 = {
 			isa = PBXGroup;
 			children = (
+				F1B4C375191C4DFF00727C4B /* includes */,
 				F1CAD82319182FDF00B02484 /* src */,
 				F1CAD82219182FDF00B02484 /* Products */,
 			);
@@ -59,8 +73,6 @@
 		F1CAD82319182FDF00B02484 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				F11C9F571919A33D00F73BDB /* HashFunctions.hpp */,
-				F11C9F581919A33D00F73BDB /* HashTable.hpp */,
 				F11C9F591919A34500F73BDB /* project1.cpp */,
 			);
 			name = src;

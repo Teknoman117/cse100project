@@ -6,37 +6,24 @@
 //  Copyright (c) 2014 HoodooNet. All rights reserved.
 //
 
-#ifndef __HASHTABLE_HPP_
-#define __HASHTABLE_HPP_
+#ifndef __CHAININGHASHTABLE_HPP_
+#define __CHAININGHASHTABLE_HPP_
 
 #include <vector>
 #include <limits>
 #include <algorithm>
-#include <map>
+#include <list>
 
-// Class to manage a hash table (T = type, M = length, H = hash functor)
+// Class to manage a hash table (T = type, H = hash functor)
 template <typename T, typename H>
-class HashTable
+class ChainingHashTable
 {
 public:
     // Define the storage type of the array
-    typedef std::vector<T> storage_type;
+    typedef std::vector<std::list<T> > storage_type;
     
-    // Define
-    typedef std::map<typename storage_type::size_type, typename storage_type::size_type> cluster_type;
-    
-    // Define the search result type
-    typedef typename storage_type::iterator search_result;
-    
-    // Special sentinel values for hash entries
-    typedef enum : T
-    {
-        // The location has never been used
-        ENTRY_UNUSED = -2,
-        
-        // The location has contained data and has been deleted
-        ENTRY_EMPTY = -1,
-    } Sentinel;
+    // Search result
+    typedef std::pair<bool, typename std::list<T>::iterator> search_result;
     
 protected:
     // data storage for the hash table
@@ -50,140 +37,56 @@ protected:
     
 public:
     // Constructor - initializes the hash function and initializes the storage
-    HashTable(typename storage_type::size_type M)
-        : storage(M, ENTRY_UNUSED), hash_function(H(M)), M(M)
+    ChainingHashTable(typename storage_type::size_type M)
+        : storage(M, T()), hash_function(H(M)), M(M)
     {
         
     }
     
     // Insert an element into the hash table
-    bool insert(const T& k)
+    void insert(const T& k)
     {
-        // Locate a place to insert the key
-        for(int i = 0; i < M; i++)
-        {
-            // Calculate the iterator for this entry
-            typename storage_type::iterator it = storage.begin() + hash_function(k, i);
-
-            // Check if this spot is empty or unused
-            if(*it == ENTRY_EMPTY || *it == ENTRY_UNUSED)
-            {
-                // We can insert the value here
-                *it = k;
-                
-                // key inserted successfully
-                return true;
-            }
-        }
-
-        // Hash table is full
-        return false;
+        // Get an iterator to the container cooresponding to this key
+        typename storage_type::iterator it = storage.begin() + hash_function(k);
+        
+        // Put the key onto the chain
+        it->push_front(k);
     }
     
     // Delete an element form the hash table
-    void remove(const T k)
+    void remove(const T& k)
     {
-        // Get an iterator to the proper chain
-        search_result result = search(k);
+        // Get an iterator to the container cooresponding to this key
+        typename storage_type::iterator it = storage.begin() + hash_function(k);
         
-        // Remove k if it exists
-        if(result != storage.end())
+        // Get an iterator to the key in this hash table
+        typename std::list<T>::iterator kIt = it->find(k);
+        
+        // If the key was found, delete it
+        if(kIt != it->end())
         {
-            // Write empty into this iterator
-            *result = ENTRY_EMPTY;
+            // Delete this key
+            it->erase(kIt);
         }
     }
     
     // Search the hash table for an element
     search_result search(const T& k)
     {
-        // have an iterator
-        search_result it;
+        // Get an iterator to the container cooresponding to this key
+        typename storage_type::iterator it = storage.begin() + hash_function(k);
         
-        // Keep hashing, looking for the entry (M is constant, compiler will unwind)
-        for(int i = 0; i < M; i++)
+        // Get an iterator to the key in this hash table
+        typename std::list<T>::iterator kIt = it->find(k);
+        
+        // If the key was found, return it
+        if(kIt != it->end())
         {
-            // Calculate the iterator for the target entry
-            it = storage.begin() + hash_function(k, i);
-        
-            // Is the spot we found unused?
-            if(*it == ENTRY_UNUSED)
-            {
-                // Return not found, as there are no more entries to check
-                return storage.end();
-            }
-            
-            // Are these the droids we're looking for?
-            else if(*it == k)
-            {
-                // Return the iterator to the location in the storage
-                return it;
-            }
+            return search_result(true, kIt);
         }
         
-        // Not found, return the end of the hash table
-        return storage.end();
-    }
-    
-    // Return a map of the found clusters
-    void clusters(cluster_type& c)
-    {
-        // Make c emptry
-        c.clear();
-        
-        // Variable to keep track of cluster length
-        typename storage_type::size_type length = 0;
-        
-        // Loop through the hash table
-        for(search_result it = storage.begin(); it != storage.end(); it++)
-        {
-            // If this hash table location contains a value
-            if(*it != ENTRY_EMPTY && *it != ENTRY_UNUSED)
-            {
-                // Add to the current run
-                length++;
-            }
-            
-            // If we have encountered an empty location and we were calculating a run
-            else if (length)
-            {
-                // See if we have already found a run of this length
-                typename cluster_type::iterator cluster = c.find(length);
-                
-                // If this is a unique cluster
-                if(cluster == c.end())
-                {
-                    // One cluster of this length
-                    c[length] = 1;
-                } else
-                {
-                    // Found another cluster
-                    cluster->second++;
-                }
-                
-                // Clear the run
-                length = 0;
-            }
-        }
-    }
-    
-    // Return the not found index of the hash table
-    search_result NotFound()
-    {
-        return storage.end();
-    }
-    
-    // Get the integral index of a returned storage iterator
-    typename storage_type::size_type indexOf(search_result& it)
-    {
-        // Validate the iterator pair
-        if(it == storage.end())
-        {
-            return std::numeric_limits<typename storage_type::size_type>::max();
-        }
-        
-        // Return the conversion (first int is the index of the hash entry, second is the index within that chain)
-        return std::distance(storage.begin(), it);
+        // Otherwise return sadness and broken dreams
+        return search_result(false, kIt);
     }
 };
 
