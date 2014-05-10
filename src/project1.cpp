@@ -9,17 +9,26 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <array>
 #include <cstdint>
 #include <cassert>
+#include <fstream>
+#include <iomanip>
 
 #include "Utilities.h"
+#include "OS.hpp"
 
 #include "HashTable.hpp"
 #include "HashFunctions.hpp"
 #include "ChainingHashTable.hpp"
 
-// Hash table type
-typedef HashTable<int64_t, hash<int64_t> > MyHashTable;
+// Time the execution of a function
+double TimeExecution(std::function<void ()> f)
+{
+    double s = OS::Now();
+    f();
+    return OS::Now() - s;
+}
 
 // Generate the keys for the experiment
 void GenerateKeys(size_t m, size_t n, std::set<int64_t>& S, std::set<int64_t>& D, std::set<int64_t>& U)
@@ -59,90 +68,88 @@ void GenerateKeys(size_t m, size_t n, std::set<int64_t>& S, std::set<int64_t>& D
     }
 }
 
-class Result
-{
-	struct timeval startTime, stopTime;
-	size_t numberOfElements;
-
-public:
-	double duration;
-
-	void start(size_t numberOfElements)
-	{
-		this->numberOfElements = numberOfElements;
-		gettimeofday(&startTime, NULL);
-	}
-
-	void stop()
-	{
-		gettimeofday(&stopTime, NULL);
-		duration = (stopTime.tv_sec - startTime.tv_sec) + (stopTime.tv_usec - startTime.tv_usec) / 1000000.0;
-		duration /= (double)numberOfElements;
-	}
-	
-	double operator/(const Result& r)
-	{
-		return this->duration / r.duration;
-	}
-	
-};
-
-std::ostream& operator<<(std::ostream& os, const Result& r)
-{
-	os << r.duration;
-	return os;
-}
-
 struct ExperimentResult
 {
-	double minTime, maxTime;
-	std::string minType, maxType;
-	Result tS, tU, ptS, ptU;
+    // Runtimes of experiments
+	double tS, tU, ptS, ptU;
+    
+    // Information for CSV files
+    double alpha;
+    
+    // Name of hash function
+    std::string hashFunctionName;
+    
+    // Write the headers for the CSV
+    static void WriteCSVHeader(std::ofstream& file)
+    {
+        file << "Hash Function" << ",";
+        file << "Alpha" << ",";
+        file << "Tsuccessful" << ",";
+        file << "Tfailed" << ",";
+        file << "Tsuccessful\'" << ",";
+        file << "Tfailed\'";
+        file << std::endl;
+    }
+    
+    // Write the experiment contents
+    void WriteCSVEntry(std::ofstream& file)
+    {
+        file << hashFunctionName << ",";
+        file << std::setprecision(2)  << alpha << ",";
+        file << std::setprecision(10) << std::fixed << tS << ",";
+        file << std::setprecision(10) << std::fixed << tU << ",";
+        file << std::setprecision(10) << std::fixed << ptS << ",";
+        file << std::setprecision(10) << std::fixed << ptU << ",";
+        file << std::endl;
+    }
 	
+    // Stuff
+    double minTime, maxTime;
+	std::string minType, maxType;
 	void calcMin()
 	{
-		minTime = tS.duration;
+		minTime = tS;
 		minType = "tS";
 
-		if (tU.duration < minTime)
+		if (tU < minTime)
 		{
-			minTime = tU.duration;
+			minTime = tU;
 			minType = "tU";
 		}
 
-		if (ptS.duration < minTime)
+		if (ptS < minTime)
 		{
-			minTime = ptS.duration;
+			minTime = ptS;
 			minType = "ptS";
 		}
 
-		if (ptU.duration < minTime)
+		if (ptU < minTime)
 		{
-			minTime = ptU.duration;
+			minTime = ptU;
 			minType = "ptU";
 		}
 	}
 
 	void calcMax()
 	{
-		maxTime = tS.duration;
+		maxTime = tS;
 		maxType = "tS";
 
-		if (tU.duration > maxTime)
+		if (tU > maxTime)
 		{
-			maxTime = tU.duration;
+			maxTime = tU;
 			maxType = "tU";
 		}
 
-		if (ptS.duration > maxTime)
+		if (ptS > maxTime)
 		{
-			maxTime = ptS.duration;
+			maxTime = ptS;
 			maxType = "ptS";
 		}
 
-		if (ptU.duration > maxTime)
+		if (ptU > maxTime)
 		{
-			maxTime = ptU.duration;
+			maxTime = ptU;
 			maxType = "ptU";
 		}
 	}
@@ -164,23 +171,26 @@ struct ExperimentResult
 };
 
 // Run the experiment
-void RunExperiment(size_t m, size_t n)
+template <class T>
+void RunExperiment(std::ofstream& logfile, size_t m, double a)
 {
     // Datasets for the experiment
     std::set<int64_t> S;
     std::set<int64_t> D;
     std::set<int64_t> U;
 
-	ExperimentResult expResult;
+    // Experiement result management
+	ExperimentResult result;
+    result.alpha = a;
+    result.hashFunctionName = "basic";
     
-    
-    // Make shit
+    // Generate keys (force n as even)
+    size_t n = m * a;
+    if(n % 2) n--;
     GenerateKeys(m, n, S, D, U);
     
-    
     // Create a hash table w/ open indexing for this lab
-    MyHashTable t(m);
-    //ChainingHashTable<int64_t, chash<int64_t> > ct(m);
+    HashTable<int64_t,T> t(m);
     
     // Insert the elements from the S set
     for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
@@ -188,50 +198,51 @@ void RunExperiment(size_t m, size_t n)
         assert(t.insert(*it));
     }
     
-    
     // Insert the elements from the D set
     for(std::set<int64_t>::iterator it = D.begin(); it != D.end(); it++)
     {
         assert(t.insert(*it));
     }
     
-    
     // Perform the initial experiment
     // Search for the elements in the S set
-	expResult.tS.start(S.size());
-    for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+    result.tS = TimeExecution( [&] ()
     {
-        // Perform the search
-        MyHashTable::search_result r = t.search(*it);
-        assert(*r == *it);
-    }
-	expResult.tS.stop();
+        for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+        {
+            // Perform the search
+            typename HashTable<int64_t, T>::search_result r = t.search(*it);
+            assert(*r == *it);
+        }
+    });
+    result.tS /= S.size();
     
     
     // Search for the elements in the U set
-	expResult.tU.start(U.size());
-    for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
+	result.tU = TimeExecution( [&] ()
     {
-        // Perform the search
-        MyHashTable::search_result r = t.search(*it);
-        assert(r == t.NotFound());
-    }
-	expResult.tU.stop();
+        for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
+        {
+            // Perform the search
+            typename HashTable<int64_t,T>::search_result r = t.search(*it);
+            assert(r == t.NotFound());
+        }
+    });
+    result.tU /= U.size();
     
     
     // Get the clusters
-    MyHashTable::cluster_type clusters;
+    /*typename HashTable<int64_t,T>::cluster_type clusters;
     t.clusters(clusters);
     
     // Print the clusters
     size_t count = 0;
-    for(MyHashTable::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
+    for(typename HashTable<int64_t,T>::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
     {
         std::cout << "Cluster Size: " << cluster->first << "; Frequency: " << cluster->second << std::endl;
         count += cluster->first * cluster->second;
     }
-    std::cout << "Total Results = " << count << std::endl << std::endl;
-    
+    std::cout << "Total Results = " << count << std::endl << std::endl;*/
     
     // Remove the elements from the D set
     for(std::set<int64_t>::iterator it = D.begin(); it != D.end(); it++)
@@ -239,86 +250,82 @@ void RunExperiment(size_t m, size_t n)
         t.remove(*it);
     }
     
-    
     // Perform the secondary experiment
     // Search for the elements in the S set
-	expResult.ptS.start(S.size());
-    for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+	result.ptS = TimeExecution( [&] ()
     {
-        // Perform the search
-        MyHashTable::search_result r = t.search(*it);
-        assert(*r == *it);
-    }
-	expResult.ptS.stop();
+        for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+        {
+            // Perform the search
+            typename HashTable<int64_t,T>::search_result r = t.search(*it);
+            assert(*r == *it);
+        }
+	});
+    result.ptS /= S.size();
     
     
     // Search for the elements in the U set
-	expResult.ptU.start(U.size());
-    for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
+	result.ptU = TimeExecution( [&] ()
     {
-        // Perform the search
-        MyHashTable::search_result r = t.search(*it);
-        assert(r == t.NotFound());
-    }
-	expResult.ptU.stop();
+        for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
+        {
+            // Perform the search
+            typename HashTable<int64_t,T>::search_result r = t.search(*it);
+            assert(r == t.NotFound());
+        }
+	});
+    result.ptU /= U.size();
     
     // Get the clusters
-    t.clusters(clusters);
+    /*t.clusters(clusters);
     
     // Print the clusters
     count = 0;
-    for(MyHashTable::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
+    for(typename HashTable<int64_t,T>::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
     {
         std::cout << "Cluster Size: " << cluster->first << "; Frequency: " << cluster->second << std::endl;
         count += cluster->first * cluster->second;
     }
-    std::cout << "Total Results = " << count << std::endl << std::endl;
+    std::cout << "Total Results = " << count << std::endl << std::endl;*/
+    result.WriteCSVEntry(logfile);
+    result.print();
 }
 
 // Main method
 int main(int argc, const char * argv[])
 {
-    int tablesize = 1048576;
-    int num_of_elements = 1000000;
-    int testnumber = 0;
+    // Seed the random generator with some dead beef
+    srand(0xDEADBEEF);
     
-    /*do
+    // Open the results file
+    std::ofstream logfile;
+    logfile.open("results.csv");
+    ExperimentResult::WriteCSVHeader(logfile);
+    std::cout << "--> Writing results to \"results.csv\" <--" << std::endl;
+    
+    // Possible alpha values
+    std::array<double, 6> alphas = {0.05, 0.10, 0.50, 0.80, 0.90, 0.95};
+    int tablesize = 1048576;
+    
+    // Run experiments
+    for(std::array<double, 6>::iterator alpha = alphas.begin(); alpha != alphas.end(); alpha++)
     {
-        do
-        {
-            //output the test number
-            std::cout << "TEST " << testnumber << std::endl;
-            
-            //get the table size
-            std::cout << "Enter The Tablesize: ";
-            std::cin >> tablesize;
-            
-            //get the number of elements
-            std::cout << "Enter The Number Of Elements: ";
-            std::cin >> num_of_elements;
-            
-            //check for tards
-            if(tablesize <= num_of_elements)
-                std::cout << "Test Not Valid" << std::endl;
-            
-        } while(tablesize <= num_of_elements);*/
-        
-        // Seed the random generator with the current time
-        srand(static_cast<unsigned int> (time(NULL)));
+        // Log this data
+        std::cout << "Starting Experiment: Alpha = " << *alpha << std::endl;
         
         // Time the experiment
-        struct timeval start,end;
-        gettimeofday(&start,NULL);
+        double runtime = TimeExecution([&] ()
+        {
+            RunExperiment<hash<int64_t> >(logfile, tablesize, *alpha);
+        });
         
-        // Run the experiment (tablesize = 1M elements, generate 10k elements)
-        RunExperiment(tablesize, num_of_elements);
-        
-        // Print the runtime
-        gettimeofday(&end,NULL);
-        fprintf(stdout,"Experiment Runtime: %f\n\n",(end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0);
-        
-        //testnumber++;
-    //} while(tablesize != 0  && num_of_elements != 0);
+        // Log this data
+        std::cout << "Completed Experiment in " << runtime << " seconds" << std::endl;
+    }
+    
+    // Close the log
+    logfile.close();
+    std::cout << "--> Log closed <--" << std::endl;
     
     return 0;
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F118EBF6191DB970001DFF6D /* OS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F118EBF5191DB970001DFF6D /* OS.cpp */; };
 		F11C9F5A1919A34500F73BDB /* project1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F11C9F591919A34500F73BDB /* project1.cpp */; };
 		F1316928191C6FDB00749380 /* Utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = F1316927191C6FDB00749380 /* Utilities.c */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F118EBF4191DB970001DFF6D /* OS.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OS.hpp; path = include/OS.hpp; sourceTree = SOURCE_ROOT; };
+		F118EBF5191DB970001DFF6D /* OS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OS.cpp; path = src/OS.cpp; sourceTree = SOURCE_ROOT; };
 		F11C9F571919A33D00F73BDB /* HashFunctions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HashFunctions.hpp; path = include/HashFunctions.hpp; sourceTree = SOURCE_ROOT; };
 		F11C9F581919A33D00F73BDB /* HashTable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HashTable.hpp; path = include/HashTable.hpp; sourceTree = SOURCE_ROOT; };
 		F11C9F591919A34500F73BDB /* project1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = project1.cpp; path = src/project1.cpp; sourceTree = SOURCE_ROOT; };
@@ -48,6 +51,7 @@
 			isa = PBXGroup;
 			children = (
 				F1B4C374191C4CCD00727C4B /* Utilities.h */,
+				F118EBF4191DB970001DFF6D /* OS.hpp */,
 				F11C9F571919A33D00F73BDB /* HashFunctions.hpp */,
 				F11C9F581919A33D00F73BDB /* HashTable.hpp */,
 				F1B4C372191C43E500727C4B /* ChainingHashTable.hpp */,
@@ -77,6 +81,7 @@
 			children = (
 				F11C9F591919A34500F73BDB /* project1.cpp */,
 				F1316927191C6FDB00749380 /* Utilities.c */,
+				F118EBF5191DB970001DFF6D /* OS.cpp */,
 			);
 			name = src;
 			path = project1;
@@ -133,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F118EBF6191DB970001DFF6D /* OS.cpp in Sources */,
 				F1316928191C6FDB00749380 /* Utilities.c in Sources */,
 				F11C9F5A1919A34500F73BDB /* project1.cpp in Sources */,
 			);
