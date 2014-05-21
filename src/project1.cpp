@@ -14,6 +14,7 @@
 #include <cassert>
 #include <fstream>
 #include <iomanip>
+#include <sstream>
 
 #include "Utilities.h"
 #include "OS.hpp"
@@ -83,7 +84,7 @@ struct ExperimentResult
     static void WriteCSVHeader(std::ofstream& file)
     {
         file << "Hash Function" << ",";
-        file << "Alpha" << ",";
+        file << "Load Factor" << ",";
         file << "Tsuccessful" << ",";
         file << "Tfailed" << ",";
         file << "Tsuccessful\'" << ",";
@@ -102,77 +103,36 @@ struct ExperimentResult
         file << std::setprecision(10) << std::fixed << ptU << ",";
         file << std::endl;
     }
-	
-    // Stuff
-    double minTime, maxTime;
-	std::string minType, maxType;
-	void calcMin()
-	{
-		minTime = tS;
-		minType = "tS";
+    
+    // Write clusters
+    template <class T>
+    void WriteClusterCSV(HashTable<int64_t,T>& t)
+    {
+        // Get the clusters
+        typename HashTable<int64_t,T>::cluster_type clusters;
+        t.clusters(clusters);
 
-		if (tU < minTime)
-		{
-			minTime = tU;
-			minType = "tU";
-		}
-
-		if (ptS < minTime)
-		{
-			minTime = ptS;
-			minType = "ptS";
-		}
-
-		if (ptU < minTime)
-		{
-			minTime = ptU;
-			minType = "ptU";
-		}
-	}
-
-	void calcMax()
-	{
-		maxTime = tS;
-		maxType = "tS";
-
-		if (tU > maxTime)
-		{
-			maxTime = tU;
-			maxType = "tU";
-		}
-
-		if (ptS > maxTime)
-		{
-			maxTime = ptS;
-			maxType = "ptS";
-		}
-
-		if (ptU > maxTime)
-		{
-			maxTime = ptU;
-			maxType = "ptU";
-		}
-	}
-
-	void print()
-	{
-		calcMin();
-		calcMax();
-
-		// Results
-		std::cout << "tS = " << tS << ", tU = " << tU << std::endl;
-		std::cout << "tU / tS = " << tU / tS << std::endl;
-		std::cout << "tS' = " << ptS << ", tU' = " << ptU << std::endl;
-		std::cout << "tU' / tS' = " << ptU / ptS << std::endl;
-
-		std::cout << "Min is " << minType.c_str() << " with time:\t" << minTime << std::endl;
-		std::cout << "Max is " << maxType.c_str() << " with time:\t" << maxTime << std::endl;
-	}
+        // Open file
+        std::ofstream logfile;
+        std::ostringstream logfileName;
+        logfileName << hashFunctionName << "." << alpha << ".csv" << std::ends;
+        logfile.open(logfileName.str().c_str());
+        
+        // Print the clusters
+        logfile << "Cluster Length,Cluster Frequency" << std::endl;
+        for(typename HashTable<int64_t,T>::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
+        {
+            logfile << cluster->first << "," << cluster->second << std::endl;
+        }
+        
+        // Close the logfile
+        logfile.close();
+    }
 };
 
 // Run the experiment
 template <class T>
-void RunExperiment(std::ofstream& logfile, size_t m, double a)
+void RunExperiment(std::ofstream& logfile, std::string name, size_t m, double a)
 {
     // Datasets for the experiment
     std::set<int64_t> S;
@@ -182,11 +142,12 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
     // Experiement result management
 	ExperimentResult result;
     result.alpha = a;
-    result.hashFunctionName = "basic";
+    result.hashFunctionName = name;
     
     // Generate keys (force n as even)
-    size_t n = m * a;
-    if(n % 2) n--;
+    size_t n = static_cast<size_t>(m * a) >> 1;
+    n <<= 1;
+    //std::cout << "    Load = " << n << std::endl;
     GenerateKeys(m, n, S, D, U);
     
     // Create a hash table w/ open indexing for this lab
@@ -206,6 +167,7 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
     
     // Perform the initial experiment
     // Search for the elements in the S set
+    //std::cout << "    tS test" << std::endl;
     result.tS = TimeExecution( [&] ()
     {
         for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
@@ -217,8 +179,8 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
     });
     result.tS /= S.size();
     
-    
     // Search for the elements in the U set
+    //std::cout << "    tU test" << std::endl;
 	result.tU = TimeExecution( [&] ()
     {
         for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
@@ -230,21 +192,11 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
     });
     result.tU /= U.size();
     
-    
-    // Get the clusters
-    /*typename HashTable<int64_t,T>::cluster_type clusters;
-    t.clusters(clusters);
-    
-    // Print the clusters
-    size_t count = 0;
-    for(typename HashTable<int64_t,T>::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
-    {
-        std::cout << "Cluster Size: " << cluster->first << "; Frequency: " << cluster->second << std::endl;
-        count += cluster->first * cluster->second;
-    }
-    std::cout << "Total Results = " << count << std::endl << std::endl;*/
+    // Write the clusters to CSV
+    result.WriteClusterCSV<T>(t);
     
     // Remove the elements from the D set
+    //std::cout << "    D set deletion phase" << std::endl;
     for(std::set<int64_t>::iterator it = D.begin(); it != D.end(); it++)
     {
         t.remove(*it);
@@ -252,6 +204,7 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
     
     // Perform the secondary experiment
     // Search for the elements in the S set
+    //std::cout << "    tS\' test" << std::endl;
 	result.ptS = TimeExecution( [&] ()
     {
         for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
@@ -263,8 +216,8 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
 	});
     result.ptS /= S.size();
     
-    
     // Search for the elements in the U set
+    //std::cout << "    tU\' test" << std::endl;
 	result.ptU = TimeExecution( [&] ()
     {
         for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
@@ -276,20 +229,112 @@ void RunExperiment(std::ofstream& logfile, size_t m, double a)
 	});
     result.ptU /= U.size();
     
-    // Get the clusters
-    /*t.clusters(clusters);
+    // Write the clusters to CSV
+    result.WriteClusterCSV<T>(t);
     
-    // Print the clusters
-    count = 0;
-    for(typename HashTable<int64_t,T>::cluster_type::iterator cluster = clusters.begin(); cluster != clusters.end(); cluster++)
-    {
-        std::cout << "Cluster Size: " << cluster->first << "; Frequency: " << cluster->second << std::endl;
-        count += cluster->first * cluster->second;
-    }
-    std::cout << "Total Results = " << count << std::endl << std::endl;*/
+    // Write the CSV entry
     result.WriteCSVEntry(logfile);
-    result.print();
 }
+
+template <class T>
+void RunExperimentChaining(std::ofstream& logfile, std::string name, size_t m, double a)
+{
+    // Datasets for the experiment
+    std::set<int64_t> S;
+    std::set<int64_t> D;
+    std::set<int64_t> U;
+    
+    // Experiement result management
+	ExperimentResult result;
+    result.alpha = a;
+    result.hashFunctionName = name;
+    
+    // Generate keys (force n as even)
+    size_t n = static_cast<size_t>(m * a) >> 1;
+    n <<= 1;
+    //std::cout << "    Load = " << n << std::endl;
+    GenerateKeys(m, n, S, D, U);
+    
+    // Create a hash table w/ open indexing for this lab
+    ChainingHashTable<int64_t,T> t(m);
+    
+    // Insert the elements from the S set
+    for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+    {
+        t.insert(*it);
+    }
+    
+    // Insert the elements from the D set
+    for(std::set<int64_t>::iterator it = D.begin(); it != D.end(); it++)
+    {
+        t.insert(*it);
+    }
+    
+    // Perform the initial experiment
+    // Search for the elements in the S set
+    //std::cout << "    tS test" << std::endl;
+    result.tS = TimeExecution( [&] ()
+    {
+        for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+        {
+            // Perform the search
+            typename ChainingHashTable<int64_t, T>::search_result r = t.search(*it);
+            assert(*(r.second) == *it);
+        }
+    });
+    result.tS /= S.size();
+    
+    // Search for the elements in the U set
+    //std::cout << "    tU test" << std::endl;
+	result.tU = TimeExecution( [&] ()
+    {
+        for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
+        {
+            // Perform the search
+            typename ChainingHashTable<int64_t,T>::search_result r = t.search(*it);
+            assert(!r.first);
+        }
+    });
+    result.tU /= U.size();
+    
+    // Remove the elements from the D set
+    //std::cout << "    D set deletion phase" << std::endl;
+    for(std::set<int64_t>::iterator it = D.begin(); it != D.end(); it++)
+    {
+        t.remove(*it);
+    }
+    
+    // Perform the secondary experiment
+    // Search for the elements in the S set
+    //std::cout << "    tS\' test" << std::endl;
+	result.ptS = TimeExecution( [&] ()
+                               {
+                                   for(std::set<int64_t>::iterator it = S.begin(); it != S.end(); it++)
+                                   {
+                                       // Perform the search
+                                       typename ChainingHashTable<int64_t,T>::search_result r = t.search(*it);
+                                       assert(*(r.second) == *it);
+                                   }
+                               });
+    result.ptS /= S.size();
+    
+    // Search for the elements in the U set
+    //std::cout << "    tU\' test" << std::endl;
+	result.ptU = TimeExecution( [&] ()
+                               {
+                                   for(std::set<int64_t>::iterator it = U.begin(); it != U.end(); it++)
+                                   {
+                                       // Perform the search
+                                       typename ChainingHashTable<int64_t,T>::search_result r = t.search(*it);
+                                       assert(!r.first);
+                                   }
+                               });
+    result.ptU /= U.size();
+    
+    // Write the CSV entry
+    result.WriteCSVEntry(logfile);
+}
+
 
 // Main method
 int main(int argc, const char * argv[])
@@ -304,24 +349,48 @@ int main(int argc, const char * argv[])
     std::cout << "--> Writing results to \"results.csv\" <--" << std::endl;
     
     // Possible alpha values
-    std::array<double, 6> alphas = {0.05, 0.10, 0.50, 0.80, 0.90, 0.95};
+    std::array<double, 8> alphas = {0.05, 0.10, 0.50, 0.80, 0.90, 0.9167, 0.9333, 0.95};
     int tablesize = 1048576;
     
-    // Run experiments
+    // Basic hashing
+    std::cout << "Testing: Basic Hash" << std::endl;
+    for(std::array<double, 8>::iterator alpha = alphas.begin(); alpha != alphas.end(); alpha++)
+    {
+        double r = TimeExecution([&] () {RunExperiment<hash<int64_t> >(logfile, "basic", tablesize, *alpha);});
+        std::cout << "  Alpha " << *alpha << ": " << r << std::endl;
+    }
+    
+    // Basic hashing
+    std::cout << "Testing: Chaining Basic Hash" << std::endl;
+    for(std::array<double, 8>::iterator alpha = alphas.begin(); alpha != alphas.end(); alpha++)
+    {
+        double r = TimeExecution([&] () {RunExperimentChaining<chash<int64_t> >(logfile, "cbasic", tablesize, *alpha);});
+        std::cout << "  Alpha " << *alpha << ": " << r << std::endl;
+    }
+    
+    // Double hashing
+    /*std::cout << "Testing: Double Hash" << std::endl;
+    for(std::array<double, 8>::iterator alpha = alphas.begin(); alpha != alphas.end(); alpha++)
+    {
+        double r = TimeExecution([&] () {RunExperiment<hash_double<int64_t> >(logfile, "double", tablesize, *alpha);});
+        std::cout << "  Alpha " << *alpha << ": " << r << std::endl;
+    }
+    
+    // Multiplicative hashing
+    /*std::cout << "Testing: Multiplicative Hash" << std::endl;
     for(std::array<double, 6>::iterator alpha = alphas.begin(); alpha != alphas.end(); alpha++)
     {
-        // Log this data
-        std::cout << "Starting Experiment: Alpha = " << *alpha << std::endl;
-        
-        // Time the experiment
-        double runtime = TimeExecution([&] ()
-        {
-            RunExperiment<hash<int64_t> >(logfile, tablesize, *alpha);
-        });
-        
-        // Log this data
-        std::cout << "Completed Experiment in " << runtime << " seconds" << std::endl;
-    }
+        double r = TimeExecution([&] () {RunExperiment<hash_mult<int64_t> >(logfile, "multiplicative", tablesize, *alpha);});
+        std::cout << "  Alpha " << *alpha << ": " << r << std::endl;
+    }*/
+    
+    // Multiplicative Double hashing
+    /*std::cout << "Testing: Multiplicative Double Hash" << std::endl;
+    for(std::array<double, 8>::iterator alpha = alphas.begin(); alpha != alphas.end(); alpha++)
+    {
+        double r = TimeExecution([&] () {RunExperiment<hash_mult_double<int64_t> >(logfile, "multiplicative double", tablesize, *alpha);});
+        std::cout << "  Alpha " << *alpha << ": " << r << std::endl;
+    }*/
     
     // Close the log
     logfile.close();

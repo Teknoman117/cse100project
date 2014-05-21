@@ -60,7 +60,7 @@ public:
         typename storage_type::iterator it = storage.begin() + hash_function(k);
         
         // Get an iterator to the key in this hash table
-        typename std::list<T>::iterator kIt = it->find(k);
+        typename std::list<T>::iterator kIt = find(it->begin(), it->end(), k);
         
         // If the key was found, delete it
         if(kIt != it->end())
@@ -77,7 +77,7 @@ public:
         typename storage_type::iterator it = storage.begin() + hash_function(k);
         
         // Get an iterator to the key in this hash table
-        typename std::list<T>::iterator kIt = it->find(k);
+        typename std::list<T>::iterator kIt = find(it->begin(), it->end(), k);
         
         // If the key was found, return it
         if(kIt != it->end())
